@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Visitor Info Log</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body class="bg-gray-100 p-6">
+    <div class="max-w-6xl mx-auto bg-white shadow-md rounded-lg p-6">
+        <h1 class="text-3xl font-bold mb-6 text-center text-indigo-600">Visitor Info Log</h1>
+        <div class="mb-6">
+            <label for="password" class="block text-lg font-medium text-gray-700">Enter Password</label>
+            <div class="relative mt-1">
+                <input type="password" id="password" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" placeholder="Enter password">
+                <button onclick="fetchLogData()" class="absolute inset-y-0 right-0 px-4 py-2 bg-indigo-600 text-white rounded-r-md hover:bg-indigo-700 focus:ring-2 focus:ring-indigo-500"><i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+        <table class="min-w-full bg-white border">
+            <thead>
+                <tr>
+                    <th class="px-4 py-2 border-b-2 border-gray-200 bg-gray-50 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Timestamp</th>
+                    <th class="px-4 py-2 border-b-2 border-gray-200 bg-gray-50 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Public IP</th>
+                    <th class="px-4 py-2 border-b-2 border-gray-200 bg-gray-50 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">Details</th>
+                </tr>
+            </thead>
+            <tbody id="logTableBody" class="bg-white divide-y divide-gray-200"></tbody>
+        </table>
+    </div>
+
+    <script>
+        function fetchLogData() {
+            const password = document.getElementById('password').value;
+            fetch('http://localhost:3000/log', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${password}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('logTableBody');
+                tbody.innerHTML = ''; // Clear existing rows
+                data.forEach(entry => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td class="px-4 py-2">${new Date(entry.systemTime).toLocaleString()}</td>
+                        <td class="px-4 py-2">${entry.publicIP}</td>
+                        <td class="px-4 py-2">${formatDetails(entry)}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            })
+            .catch(error => console.error('Error fetching log data:', error));
+        }
+
+        function formatDetails(entry) {
+            let detailsHTML = '';
+            for (const [key, value] of Object.entries(entry)) {
+                if (key !== 'systemTime' && key !== 'publicIP') {
+                    detailsHTML += `<div class="mb-2"><span class="font-semibold">${key}:</span> ${formatValue(value)}</div>`;
+                }
+            }
+            return detailsHTML;
+        }
+
+        function formatValue(value) {
+            if (Array.isArray(value)) {
+                return value.join(', ');
+            } else if (typeof value === 'object' && value !== null) {
+                return '<pre class="whitespace-pre-wrap">' + JSON.stringify(value, null, 2) + '</pre>';
+            } else {
+                return value;
+            }
+        }
+    </script>
+</body>
+</html>
