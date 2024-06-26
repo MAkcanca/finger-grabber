@@ -9,6 +9,8 @@ const lockFile = require('proper-lockfile');
 
 const app = express();
 const port = 3000;
+// Retrieve from env
+const password = process.env.PASSWORD || '12345';
 
 const logFilePath = path.join(__dirname, 'log.jsonl');
 
@@ -60,7 +62,7 @@ app.post('/api/visitor-info', async (req, res) => {
 app.post('/log', (req, res) => {
     const authHeader = req.headers.authorization;
     const token = authHeader && authHeader.split(' ')[1];
-    if (token !== '12345') {
+    if (token !== password) {
         res.status(401).json({ error: 'Unauthorized' });
         return;
     }
