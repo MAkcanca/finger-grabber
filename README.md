@@ -27,7 +27,7 @@ finger-grabber is a DNS server and logging system that captures detailed visitor
 1. Clone the repository:
 
    ```bash
-   git clone https://github.com/yourusername/finger-grabber.git
+   git clone https://github.com/MAkcanca/finger-grabber.git
    cd finger-grabber
    ```
 
