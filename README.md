@@ -10,17 +10,6 @@ finger-grabber is a DNS server and logging system that captures detailed visitor
 - **Detailed Logging**: Logs include headers, timestamps, and DNS leak results.
 
 ![logtable](https://github.com/MAkcanca/finger-grabber/assets/9960579/d5662ff2-b8bd-4b65-8b66-cbe73c3388e2)
-## Requirements
-
-- Node.js
-- npm (Node Package Manager)
-- Express
-- native-dns
-- proper-lockfile
-- cors
-- body-parser
-- nginx
-- certbot (for SSL certificates)
 
 ## Installation
 
