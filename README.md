@@ -57,6 +57,22 @@ finger-grabber is a DNS server and logging system that captures detailed visitor
    node server.js
    ```
 
+## Docker Setup
+
+0. Create your .env file, you can take a look at .env.example
+
+1. Build and start the Docker containers:
+
+   ```bash
+   docker-compose up --build
+   ```
+
+2. Access the application:
+
+   - Access the Express server via `http://YOUR_DOMAIN`.
+
+3. Access the logs via: `http://YOUR_DOMAIN/logstable.html`
+
 ## DNS Configuration
 
 Update your DNS settings with the following entries:
