@@ -66,7 +66,7 @@ finger-grabber is a DNS server and logging system that captures detailed visitor
 
 Update your DNS settings with the following entries:
 
-- `A ns1.sub -> 134.209.230.201`
+- `A ns1.sub -> YOURIP`
 - `CNAME *.sub -> ns1.sub.YOURDOMAIN`
 - `NS sub -> ns1.sub.YOURDOMAIN`
 
