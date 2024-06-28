@@ -1,2 +1,4 @@
 node_modules/
 log.jsonl
+.env
+dns_leak_logs.json

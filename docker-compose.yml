@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  dns-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.dns
+    environment:
+      - SERVER_DOMAIN=${SERVER_DOMAIN}
+      - SERVER_IP=${SERVER_IP}
+      - PASSWORD=${PASSWORD}
+    volumes:
+      - ./dns_leak_logs.json:/usr/src/app/dns_leak_logs.json
+    ports:
+      - "53:53/udp"
+
+  express-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.express
+    environment:
+      - SERVER_DOMAIN=${SERVER_DOMAIN}
+      - SERVER_IP=${SERVER_IP}
+      - PASSWORD=${PASSWORD}
+    volumes:
+      - ./log.jsonl:/usr/src/app/log.jsonl
+      - ./dns_leak_logs.json:/usr/src/app/dns_leak_logs.json
+      - ./public:/usr/src/app/public
+    depends_on:
+      - dns-server
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    ports:
+      - "80:80"
+    environment:
+      - SERVER_DOMAIN=${SERVER_DOMAIN}
+    depends_on:
+      - express-server
+      - dns-server

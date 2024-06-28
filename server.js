@@ -7,22 +7,35 @@ const lockFile = require('proper-lockfile');
 
 const app = express();
 const port = 3000;
-const password = '12345';
+const password = process.env.PASSWORD;
+const serverDomain = process.env.SERVER_DOMAIN;
 
 const logFilePath = path.join(__dirname, 'log.jsonl');
 const dnsLog = path.join(__dirname, 'dns_leak_logs.json');
 
 // Create log file if it does not exist
 if (!fs.existsSync(logFilePath)) {
+    console.log(`Creating log file: ${logFilePath}`);
     fs.writeFileSync(logFilePath, '');
 }
 
+if (!fs.existsSync(dnsLog)) {
+    console.log(`Creating DNS log file: ${dnsLog}`);
+    fs.writeFileSync(dnsLog, '');
+}
+
 async function retrieveDnsLeakLogs() {
-    const logs = fs.readFileSync(dnsLog, 'utf-8')
-        .trim()
-        .split('\n')
-        .map(line => JSON.parse(line));
-    return logs;
+    try {
+        console.log(`Reading DNS log file: ${dnsLog}`);
+        const logs = fs.readFileSync(dnsLog, 'utf-8')
+            .trim()
+            .split('\n')
+            .map(line => JSON.parse(line));
+        return logs;
+    } catch (error) {
+        console.error('Error reading DNS leak logs:', error);
+        return [];
+    }
 }
 
 app.use((req, res, next) => {
@@ -54,6 +67,7 @@ app.post('/api/visitor-info', async (req, res) => {
         lockFile.unlock(logFilePath);
     } catch (err) {
         console.error('Error writing to log file', err);
+        lockFile.unlock(logFilePath);
     }
 
     res.json(augmentedData);
@@ -67,6 +81,7 @@ app.post('/log', async (req, res) => {
         return;
     }
     try {
+        console.log(`Reading log file: ${logFilePath}`);
         const logs = fs.readFileSync(logFilePath, 'utf-8')
             .trim()
             .split('\n')
@@ -78,6 +93,7 @@ app.post('/log', async (req, res) => {
         });
         res.json(logs);
     } catch (err) {
+        console.error('Error reading log file:', err);
         res.status(500).json({ error: 'Error reading log file' });
     }
 });
@@ -99,9 +115,12 @@ app.delete('/log', (req, res) => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Instead of 404, we serve index.html
-app.use((req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// Serve index.html and inject SERVER_DOMAIN
+app.get('/', (req, res) => {
+    const indexHtmlPath = path.join(__dirname, 'public', 'index.html');
+    let indexHtml = fs.readFileSync(indexHtmlPath, 'utf-8');
+    indexHtml = indexHtml.replace('YOUR_SERVER_DOMAIN', serverDomain);
+    res.send(indexHtml);
 });
 
 app.listen(port, () => {
